@@ -1,0 +1,13 @@
+{
+    "reprojection": {
+		"in": "EPSG:28992",
+        "out": "EPSG:4978",
+		"hammer": true
+    },
+    "formats": {
+        "cesium": {
+            "tilesetSplit": 8,
+            "geometricErrorDivisor": 8.0
+        }
+    }
+}
