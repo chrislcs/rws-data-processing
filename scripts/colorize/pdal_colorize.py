@@ -6,13 +6,16 @@ Python3
 """
 
 from io import BytesIO
+import json
 import numpy as np
 import matplotlib.image as mpimg
 from owslib.wms import WebMapService
 from requests.exceptions import ReadTimeout
 
 
-def retrieve_image(min_x, max_x, min_y, max_y):
+def retrieve_image(min_x, max_x, min_y, max_y,
+                   wms_url, wms_layer, wms_srs,
+                   wms_version, wms_format):
     """
     Download an orthophoto from the PDOK WMS service.
 
@@ -46,18 +49,19 @@ def retrieve_image(min_x, max_x, min_y, max_y):
 
     for i in range(retry):
         try:
-            wms = WebMapService('https://geodata.nationaalgeoregister.nl/'
-                                'luchtfoto/rgb/wms?', version='1.3.0')
-            wms_img = wms.getmap(layers=['2016_ortho25'],
-                                 srs='EPSG:28992',
+            wms = WebMapService(wms_url, version=wms_version)
+            wms_img = wms.getmap(layers=[wms_layer],
+                                 srs=wms_srs,
                                  bbox=(min_x, min_y, max_x, max_y),
                                  size=img_size,
-                                 format='image/png',
+                                 format=wms_format,
                                  transparent=True)
             break
-        except ReadTimeout:
+        except ReadTimeout as e:
             if i != retry-1:
                 print("ReadTimeout, trying again..")
+            else:
+                raise e
 
     img = mpimg.imread(BytesIO(wms_img.read()))
 
@@ -73,13 +77,19 @@ def las_colorize(ins, outs):
     ----------
 
     """
+    wms = pdalargs
+    if isinstance(pdalargs, str):
+        wms = json.loads(pdalargs)
     X = ins['X']
     Y = ins['Y']
 
     xdim = [min(X), max(X)]
     ydim = [min(Y), max(Y)]
 
-    img = retrieve_image(xdim[0], xdim[1], ydim[0], ydim[1])
+    img = retrieve_image(xdim[0], xdim[1], ydim[0], ydim[1],
+                         wms['wms_url'], wms['wms_layer'],
+                         wms['wms_srs'], wms['wms_version'],
+                         wms['wms_format'])
 
     img_size = img.shape[:2]
 

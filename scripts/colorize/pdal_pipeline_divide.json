@@ -12,7 +12,8 @@
       "type": "filters.programmable",
       "script": "pdal_colorize.py",
       "function": "las_colorize",
-      "module":"anything"
+      "module":"anything",
+      "pdalargs": "pdal-args"
     },
     {
       "type":"writers.las",
