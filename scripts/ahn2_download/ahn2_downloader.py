@@ -51,7 +51,7 @@ def argument_parser():
     """
     Define and return the arguments.
     """
-    description = "Download an AHN2 data tile."
+    description = "Download an AHN2 data tile by tile id."
     parser = argparse.ArgumentParser(description=description)
     required_named = parser.add_argument_group('required named arguments')
     required_named.add_argument('-t', '--tileid',
