@@ -11,17 +11,17 @@ import zipfile
 import argparse
 import subprocess
 import requests
-from lxml import etree
+import xml.etree.ElementTree as etree
 
 
 def request_data(root, tile_id, output_folder):
     namespaces = {"xmlns": "http://www.w3.org/2005/Atom",
                   "xmlns:georss": "http://www.georss.org/georss"}
 
-    try:
-        tile = root.xpath('xmlns:entry[xmlns:id="{}.laz.zip"]'.format(tile_id),
-                          namespaces=namespaces)[0]
-    except IndexError:
+    tile = root.find('xmlns:entry[xmlns:id="{}.laz.zip"]'.format(tile_id),
+                     namespaces=namespaces)
+
+    if tile is None:
         return False
 
     url = tile.find('xmlns:link', namespaces=namespaces).attrib['href']
@@ -42,7 +42,7 @@ def request_tile(tile_id, output_folder, verbose=False):
                      'atom/ahn2_uitgefilterd.xml')
     root = etree.fromstring(r.content)
     success = request_data(root, 'u{}'.format(tile_id), output_folder)
-    
+
     if verbose:
         if success:
             print("Download complete.")
