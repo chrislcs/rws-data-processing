@@ -69,7 +69,7 @@ def argument_parser():
                                 help='The output colorized LAS/LAZ file.',
                                 required=True)
     parser.add_argument('-s', '--las_srs',
-                        help='The spatial reference system of the LAS data.',
+                        help='The spatial reference system of the LAS data. (Default: EPSG:28992)',
                         required=False,
                         default='EPSG:28992')
     parser.add_argument('-w', '--wms_url',
