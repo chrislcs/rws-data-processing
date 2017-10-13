@@ -1,0 +1,17 @@
+{
+    "pipeline":[
+        {
+            "type":"readers.las",
+            "filename": "file-input.las"
+        },
+        {
+            "type": "filters.crop",
+            "polygon": "crop-poly"
+        },
+        {
+            "type":"writers.las",
+            "a_srs": "EPSG:28992",
+            "filename":"file-output.las"
+        }
+    ]
+}
