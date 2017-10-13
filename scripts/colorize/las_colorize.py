@@ -10,7 +10,7 @@ import argparse
 import subprocess
 
 
-def run_pdal(input_path, output_path,
+def run_pdal(input_path, output_path, las_srs,
              wms_url, wms_layer, wms_srs,
              wms_version, wms_format,
              divide=1):
@@ -35,7 +35,8 @@ def run_pdal(input_path, output_path,
                           '\\\"wms_srs\\\": \\\"{}\\\",'.format(wms_srs) +
                           '\\\"wms_version\\\": \\\"{}\\\",'.format(wms_version) +
                           '\\\"wms_format\\\": \\\"{}\\\"}}"'.format(wms_format)),
-                         '--writers.las.filename={}'.format(output_path)])
+                         '--writers.las.filename={}'.format(output_path),
+                         '--writers.las.a_srs={}'.format(las_srs)])
     else:
         if output_path.find('#') == -1:
             basename, ext = os.path.splitext(output_path)
@@ -50,7 +51,8 @@ def run_pdal(input_path, output_path,
                           '\\\"wms_srs\\\": \\\"{}\\\",'.format(wms_srs) +
                           '\\\"wms_version\\\": \\\"{}\\\",'.format(wms_version) +
                           '\\\"wms_format\\\": \\\"{}\\\"}}"'.format(wms_format)),
-                         '--writers.las.filename={}'.format(output)])
+                         '--writers.las.filename={}'.format(output),
+                         '--writers.las.a_srs={}'.format(las_srs)])
 
 def argument_parser():
     """
@@ -66,6 +68,10 @@ def argument_parser():
     required_named.add_argument('-o', '--output',
                                 help='The output colorized LAS/LAZ file.',
                                 required=True)
+    parser.add_argument('-s', '--las_srs',
+                        help='The spatial reference system of the LAS data.',
+                        required=False,
+                        default='EPSG:28992')
     parser.add_argument('-w', '--wms_url',
                         help='The url of the WMS service to use.',
                         required=False,
@@ -74,7 +80,7 @@ def argument_parser():
                         help='The layer of the WMS service to use.',
                         required=False,
                         default='2016_ortho25')
-    parser.add_argument('-s', '--wms_srs',
+    parser.add_argument('-r', '--wms_srs',
                         help='The spatial reference system of the WMS data to request.',
                         required=False,
                         default='EPSG:28992')
@@ -96,8 +102,9 @@ def argument_parser():
 
 def main():
     args = argument_parser()
-    run_pdal(args.input, args.output, args.wms_url, args.wms_layer,
-             args.wms_srs, args.wms_version, args.wms_format,
+    run_pdal(args.input, args.output, args.las_srs,
+             args.wms_url, args.wms_layer, args.wms_srs,
+             args.wms_version, args.wms_format,
              divide=args.divide)
 
 
