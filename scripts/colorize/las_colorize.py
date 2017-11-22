@@ -82,10 +82,10 @@ def process_files(input_path, output_path, las_srs,
                         basename, ext = os.path.splitext(output_path)
                         out = '{}_{}{}'.format(basename, i, ext)
 
-                    call_pdal(path, las, out, las_srs, wms_url, wms_layer,
+                    run_pdal(path, las, out, las_srs, wms_url, wms_layer,
                               wms_srs, wms_version, wms_format, divide)
     else:
-        call_pdal(path, input_path, output_path, las_srs, wms_url,
+        run_pdal(path, input_path, output_path, las_srs, wms_url,
                   wms_layer, wms_srs, wms_version, wms_format, divide)
 
 
