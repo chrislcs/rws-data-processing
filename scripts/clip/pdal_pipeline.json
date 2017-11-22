@@ -6,7 +6,7 @@
         },
         {
             "type": "filters.crop",
-            "polygon": "crop-poly"
+            "polygon": "polygon-wkt"
         },
         {
             "type":"writers.las",

@@ -4,7 +4,7 @@ This python script adds color to a LAS/LAZ file using PDOK aerial imagery and th
 
 ## Installation
 
-Install python3 (with numpy, matplotlib, requests and owslib libraries) and [PDAL](https://www.pdal.io/) (with LASzip). The easiest way to install these packages on windows is with [OSGeo4W](https://trac.osgeo.org/osgeo4w/). Choose `advanced install` and select the following packages: `pdal`, `laszip`, `python3-core`, `python3-numpy`, `python3-matplotlib`, `python3-requests`, `python3-owslib`.
+Install python3 (with numpy, matplotlib, requests and owslib libraries) and [PDAL](https://www.pdal.io/) (with LASzip). The easiest way to install these packages on windows is with [OSGeo4W](https://trac.osgeo.org/osgeo4w/). Choose `advanced install` and select at least the following packages: `pdal`, `laszip`, `python3-core`, `python3-numpy`, `python3-matplotlib`, `python3-requests`, `python3-owslib`.
 
 ## Usage
 

@@ -5,7 +5,7 @@
       "filename": "file-input.las"
     },
     {
-      "type": "filters.programmable",
+      "type": "filters.python",
       "script": "pdal_colorize.py",
       "function": "las_colorize",
       "module": "anything",

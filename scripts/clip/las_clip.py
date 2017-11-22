@@ -11,7 +11,25 @@ import subprocess
 from osgeo import ogr
 
 
+def call_pdal(path, las, out, srs, wkt):
+    if len(wkt) > 30000:
+        subprocess.call(['pdal', 'pipeline',
+                         '{}/pdal_pipeline.json'.format(path),
+                         '--readers.las.filename={}'.format(las),
+                         '--writers.las.filename={}'.format(out),
+                         '--writers.las.a_srs={}'.format(srs)])
+    else:
+        subprocess.call(['pdal', 'pipeline',
+                         '{}/pdal_pipeline.json'.format(path),
+                         '--readers.las.filename={}'.format(las),
+                         '--filters.crop.polygon={}'.format(wkt),
+                         '--writers.las.filename={}'.format(out),
+                         '--writers.las.a_srs={}'.format(srs)])
+
 def clip_las(input_path, output_path, shp_path, srs):
+    input_path = os.path.abspath(input_path).replace('\\', '/')
+    output_path = os.path.abspath(output_path).replace('\\', '/')
+
     input_shape = ogr.Open(shp_path)
     layer = input_shape.GetLayer()
     if len(layer) > 1:
@@ -21,11 +39,37 @@ def clip_las(input_path, output_path, shp_path, srs):
         geometry = feature.GetGeometryRef()
         wkt = geometry.ExportToWkt()
 
-        subprocess.call(['pdal', 'pipeline', 'pdal_pipeline.json',
-                         '--readers.las.filename={}'.format(input_path),
-                         '--filters.crop.polygon={}'.format(wkt),
-                         '--writers.las.filename={}'.format(output_path),
-                         '--writers.las.a_srs={}'.format(srs)])
+        long_wkt = False
+        if len(wkt) > 30000:
+            print wkt
+            print "Polygon WKT too long, please copy the WKT above manually to the pdal_pipeline.json file."
+            print "Press enter to continue.."
+            raw_input()
+
+        path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
+
+        if os.path.isdir(input_path):
+            for i, f in enumerate(os.listdir(input_path)):
+                if f.endswith(".las") or f.endswith(".laz"):
+                    las = os.path.join(input_path, f).replace('\\', '/')
+
+                    if os.path.isdir(output_path):
+                        output_path = output_path + '/' if output_path[-1] != '/' else output_path
+                        basename, ext = os.path.splitext(f)
+                        out = '{}{}_clip{}'.format(output_path, basename, ext)
+                    else:
+                        basename, ext = os.path.splitext(output_path)
+                        out = '{}_{}{}'.format(basename, i, ext)
+
+                    call_pdal(path, las, out, srs, wkt)
+
+        elif os.path.isdir(output_path):
+            output_path = output_path + '/' if output_path[-1] != '/' else output_path
+            basename, ext = os.path.splitext(os.path.basename(input_path))
+            out = '{}{}_clip{}'.format(output_path, basename, ext)
+            call_pdal(path, input_path, out, srs, wkt)
+        else:
+            call_pdal(path, input_path, output_path, srs, wkt)
 
 
 def argument_parser():
@@ -55,8 +99,7 @@ def argument_parser():
 
 def main():
     args = argument_parser()
-    run_pdal(args.input, args.output, args.polygon, args.las_srs, args.verbose)
-
+    clip_las(args.input, args.output, args.polygon, args.las_srs)
 
 if __name__ == '__main__':
     main()

@@ -5,11 +5,11 @@
       "filename": "file-input.las"
     },
     {
-      "type": "filters.divider",
-      "count": "2"
+      "type": "filters.chipper",
+      "capacity": "200000"
     },
     {
-      "type": "filters.programmable",
+      "type": "filters.python",
       "script": "pdal_colorize.py",
       "function": "las_colorize",
       "module":"anything",
