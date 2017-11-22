@@ -41,9 +41,9 @@ def clip_las(input_path, output_path, shp_path, srs):
 
         long_wkt = False
         if len(wkt) > 30000:
-            print wkt
-            print "Polygon WKT too long, please copy the WKT above manually to the pdal_pipeline.json file."
-            print "Press enter to continue.."
+            print(wkt)
+            print("Polygon WKT too long, please copy the WKT above manually to the pdal_pipeline.json file.")
+            print("Press enter to continue..")
             raw_input()
 
         path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
