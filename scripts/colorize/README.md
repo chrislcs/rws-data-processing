@@ -1,6 +1,6 @@
 # LAS/LAZ Colorize
 
-This python script adds color to a LAS/LAZ file using PDOK aerial imagery and the PDAL library.
+This python script adds color to a LAS/LAZ file using a WMS service (Default: PDOK 2016 aerial imagery) and the PDAL library.
 
 ## Installation
 

@@ -10,7 +10,7 @@ Install python3 (with requests module)
 
 Open a command prompt. Run the following command:
 
-    python3 ahn2_downloader.py -h
+    python ahn2_downloader.py -h
 
 To see the help.
 
@@ -18,4 +18,4 @@ To get the tile id of a tile use the [AHN2 WFS service by PDOK](https://www.pdok
 
 ## Example
 
-    python3 ahn2_downloader.py -t 25bz2 -o ../../data/25bz2/
+    python ahn2_downloader.py -t 25bz2 -o ../../data/25bz2/
