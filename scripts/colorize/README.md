@@ -10,10 +10,10 @@ Install python3 (with numpy, matplotlib, requests and owslib libraries) and [PDA
 
 Open a command prompt (if you are using OSGeo4W: open a OSGeo4W shell and run `py3_env.bat` located in the `bin` folder in your OSGeo4W installation folder). Run the following command:
 
-    python3 las_colorize.py -h
+    python las_colorize.py -h
 
 To see the help.
 
 ## Example
 
-    python3 las_colorize.py -i C_25DN2.las -o C_25DN2_color.las
+    python las_colorize.py -i C_25DN2.las -o C_25DN2_color.las

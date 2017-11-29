@@ -10,10 +10,10 @@ Install python3 (with osgeo library) and [PDAL](https://www.pdal.io/) (with LASz
 
 Open a command prompt (if you are using OSGeo4W: open a OSGeo4W shell and run `py3_env.bat` located in the `bin` folder in your OSGeo4W installation folder). Run the following command:
 
-    python3 las_clip.py -h
+    python las_clip.py -h
 
 To see the help.
 
 ## Example
 
-    python3 las_clip.py
+    python las_clip.py
