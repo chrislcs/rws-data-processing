@@ -39,11 +39,12 @@ def request_data(root, tile_id, output_folder, verbose=False):
                 total_length = int(total_length)
             else:
                 size = tile.find('xmlns:content', namespaces=namespaces).text
-                size = float(size.split(':')[1].split(' ')[1].replace(',', '.'))
+                size = float(size.split(':')[1].split(
+                    ' ')[1].replace(',', '.'))
                 total_length = int(size * 1048576)
 
             dl = 0
-            chunk = total_length/100 if total_length is not None else 1048576
+            chunk = total_length//100 if total_length is not None else 1048576
             for data in zipped_data.iter_content(chunk_size=chunk):
                 f.write(data)
                 dl += len(data)
@@ -51,10 +52,15 @@ def request_data(root, tile_id, output_folder, verbose=False):
                 if total_length is not None:
                     done = int(100 * dl / total_length)
                     sys.stdout.write("\r[{}{}] - {}% {}/{} mb".format('=' * done,
-                                     ' ' * (100 - done), done, dl/1048576, total_length/1048576))
+                                                                      ' ' *
+                                                                      (100 - done),
+                                                                      done,
+                                                                      dl/1048576,
+                                                                      total_length/1048576))
                     sys.stdout.flush()
                 elif verbose:
-                    sys.stdout.write("\r {:0.1f} mb downloaded..".format(dl/1048576))
+                    sys.stdout.write(
+                        "\r {:0.1f} mb downloaded..".format(dl/1048576))
                     sys.stdout.flush()
 
             if verbose:
@@ -156,6 +162,7 @@ def main():
                 print("Done!")
         elif args.verbose:
             print("Merging failed. File not found. Keeping original files.")
+
 
 if __name__ == '__main__':
     main()
