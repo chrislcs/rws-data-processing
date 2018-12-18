@@ -2,33 +2,60 @@
 """
 Python3
 
-@author: chrisl
+@author: Chris Lucas
 """
 
 from io import BytesIO
 import json
+import math
 import numpy as np
 import matplotlib.image as mpimg
 from owslib.wms import WebMapService
 from requests.exceptions import ReadTimeout
 
 
-def retrieve_image(min_x, max_x, min_y, max_y,
-                   wms_url, wms_layer, wms_srs,
-                   wms_version, wms_format):
+def request_image(bbox, size, wms_url, wms_layer, wms_srs,
+                  wms_version, wms_format, retries):
+
+    for i in range(retries):
+        try:
+            wms = WebMapService(wms_url, version=wms_version)
+            wms_img = wms.getmap(layers=[wms_layer],
+                                 srs=wms_srs,
+                                 bbox=bbox,
+                                 size=size,
+                                 format=wms_format,
+                                 transparent=True)
+            break
+        except ReadTimeout as e:
+            if i != retries-1:
+                print("ReadTimeout, trying again..")
+            else:
+                raise e
+
+    img = mpimg.imread(BytesIO(wms_img.read()))
+
+    return img
+
+
+def image_size(bbox, ppm=4):
+    dif_x = bbox[2] - bbox[0]
+    dif_y = bbox[3] - bbox[1]
+    aspect_ratio = dif_x / dif_y
+    resolution = int(dif_x * ppm)
+    img_size = (resolution, int(resolution / aspect_ratio))
+
+    return img_size
+
+
+def retrieve_image(bbox, wms_url, wms_layer, wms_srs,
+                   wms_version, wms_format, ppm, max_image_size):
     """
     Download an orthophoto from the PDOK WMS service.
 
     Parameters
     ----------
-    min_x : float
-        The minimal x-coordinate of the requested image.
-    max_x : float
-        The maximal x-coordinate of the requested image.
-    min_y : float
-        The minimal y-coordinate of the requested image.
-    max_y : float
-        The maximal y-coordinate of the requested image.
+    bbox
 
     Returns
     -------
@@ -39,31 +66,42 @@ def retrieve_image(min_x, max_x, min_y, max_y,
     ------
     PNG image
     """
-    dif_x = max_x - min_x
-    dif_y = max_y - min_y
-    aspect_ratio = dif_x / float(dif_y)
-    resolution = int(dif_x * 4)
-    img_size = (resolution, int(resolution / aspect_ratio))
+    retries = 10
 
-    retry = 10
+    [xmin, ymin, xmax, ymax] = bbox
 
-    for i in range(retry):
-        try:
-            wms = WebMapService(wms_url, version=wms_version)
-            wms_img = wms.getmap(layers=[wms_layer],
-                                 srs=wms_srs,
-                                 bbox=(min_x, min_y, max_x, max_y),
-                                 size=img_size,
-                                 format=wms_format,
-                                 transparent=True)
-            break
-        except ReadTimeout as e:
-            if i != retry-1:
-                print("ReadTimeout, trying again..")
-            else:
-                raise e
+    x_range = xmax - xmin
+    y_range = ymax - ymin
+    longest_side = max([x_range, y_range])
 
-    img = mpimg.imread(BytesIO(wms_img.read()))
+    if (longest_side * ppm > max_image_size):
+        length = max_image_size / ppm
+        length_pixels = max_image_size
+
+        rows = int(math.ceil((ymax-ymin)/length))
+        cols = int(math.ceil((xmax-xmin)/length))
+
+        img = np.zeros((length_pixels*rows, length_pixels*cols, 3))
+
+        for col in range(cols):
+            for row in range(rows):
+                cell = [xmin+col*length, ymin+row*length,
+                        xmin+(col+1)*length, ymin+(row+1)*length]
+
+                img_part = request_image(cell, (length_pixels, length_pixels),
+                                         wms_url, wms_layer, wms_srs,
+                                         wms_version, wms_format, retries)
+
+                img[((length_pixels*rows)-(row+1) *
+                     length_pixels):(length_pixels*rows)-row*length_pixels,
+                    col*length_pixels:(col+1)*length_pixels] = img_part
+
+        img = img[(length_pixels*rows)-int(y_range*ppm):,
+                  :int(round(x_range*ppm))]
+    else:
+        size = image_size(bbox)
+        img = request_image(bbox, size, wms_url, wms_layer, wms_srs,
+                            wms_version, wms_format, retries)
 
     return img
 
@@ -83,19 +121,18 @@ def las_colorize(ins, outs):
     X = ins['X']
     Y = ins['Y']
 
-    xdim = [min(X), max(X)]
-    ydim = [min(Y), max(Y)]
+    [xmin, ymin, xmax, ymax] = bbox = [min(X), min(Y), max(X), max(Y)]
 
-    img = retrieve_image(xdim[0], xdim[1], ydim[0], ydim[1],
-                         wms['wms_url'], wms['wms_layer'],
+    img = retrieve_image(bbox, wms['wms_url'], wms['wms_layer'],
                          wms['wms_srs'], wms['wms_version'],
-                         wms['wms_format'])
+                         wms['wms_format'], int(wms['wms_ppm']),
+                         int(wms['wms_max_image_size']))
 
     img_size = img.shape[:2]
 
-    x_img = np.round(((X - xdim[0]) / (xdim[1]-xdim[0])) *
+    x_img = np.round(((X - xmin) / (xmax-xmin)) *
                      (img_size[1]-1)).astype(int)
-    y_img = np.round(((ydim[1] - Y) / (ydim[1]-ydim[0])) *
+    y_img = np.round(((ymax - Y) / (ymax-ymin)) *
                      (img_size[0]-1)).astype(int)
 
     rgb = img[y_img, x_img] * 255
